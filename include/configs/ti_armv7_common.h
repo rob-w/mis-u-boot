@@ -62,9 +62,9 @@
 	"mmcdev=0\0" \
 	"mmcrootfstype=ext4 rootwait\0" \
 	"finduuid=part uuid mmc 0:2 uuid\0" \
-	"args_mmc=run finduuid;setenv bootargs console=${console} " \
+	"args_mmc=setenv bootargs console=${console} " \
 		"${optargs} " \
-		"root=PARTUUID=${uuid} rw " \
+		"root=${mmcroot} " \
 		"rootfstype=${mmcrootfstype}\0"
 
 /*
