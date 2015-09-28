@@ -58,6 +58,11 @@ static inline int board_is_idk(void)
 	return !strncmp(am43xx_board_name, "AM43_IDK", HDR_NAME_LEN);
 }
 
+static inline int board_is_misdimm(void)
+{
+	return !strncmp(am43xx_board_name, "MISDIMM_", HDR_NAME_LEN);
+}
+
 static inline int board_is_evm_14_or_later(void)
 {
 	return (board_is_gpevm() && strncmp("1.4", am43xx_board_rev, 3) <= 0);

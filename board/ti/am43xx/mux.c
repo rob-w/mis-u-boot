@@ -62,6 +62,17 @@ static struct module_pin_mux mmc0_pin_mux[] = {
 	{-1},
 };
 
+static struct module_pin_mux mmc1_pin_mux[] = {
+	{OFFSET(gpmc_csn1), (MODE(2) | PULLUDDIS | RXACTIVE)},  /* MMC1_CLK */
+	{OFFSET(gpmc_csn2), (MODE(2) | PULLUP_EN | RXACTIVE)},  /* MMC1_CMD */
+	{OFFSET(gpmc_ad8),	(MODE(2) | PULLUP_EN | RXACTIVE)}, /* MMC1_DAT0 */
+	{OFFSET(gpmc_ad9),	(MODE(2) | PULLUP_EN | RXACTIVE)}, /* MMC2_DAT1 */
+	{OFFSET(gpmc_ad10), (MODE(2) | PULLUP_EN | RXACTIVE)}, /* MMC3_DAT2 */
+	{OFFSET(gpmc_ad11), (MODE(2) | PULLUP_EN | RXACTIVE)}, /* MMC4_DAT3 */
+	{OFFSET(gpmc_wen),	(MODE(7) | PULLUP_EN | RXACTIVE)}, /* MMC1_RSTn */
+	{-1},
+};
+
 static struct module_pin_mux i2c0_pin_mux[] = {
 	{OFFSET(i2c0_sda), (MODE(0) | PULLUP_EN | RXACTIVE | SLEWCTRL)},
 	{OFFSET(i2c0_scl), (MODE(0) | PULLUP_EN | RXACTIVE | SLEWCTRL)},
@@ -70,6 +81,13 @@ static struct module_pin_mux i2c0_pin_mux[] = {
 
 static struct module_pin_mux gpio5_7_pin_mux[] = {
 	{OFFSET(spi0_cs0), (MODE(7) | PULLUP_EN)},	/* GPIO5_7 */
+	{-1},
+};
+
+static struct module_pin_mux general_pin_mux[] = {
+	/* Make extra sure on misdimm */
+	{OFFSET(spi2_d0), (MODE(7) | PULLDOWN_EN)}, /* REGULATORS_OFF */
+	{OFFSET(spi0_sclk), (MODE(7) | PULLDOWN_EN)}, /* INTERFACES_OFF */
 	{-1},
 };
 
@@ -122,6 +140,12 @@ void enable_uart0_pin_mux(void)
 void enable_board_pin_mux(void)
 {
 	configure_module_pin_mux(mmc0_pin_mux);
+
+	if (board_is_misdimm()) {
+		configure_module_pin_mux(mmc1_pin_mux);
+		configure_module_pin_mux(general_pin_mux);
+	}
+
 	configure_module_pin_mux(i2c0_pin_mux);
 	configure_module_pin_mux(mdio_pin_mux);
 

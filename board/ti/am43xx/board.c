@@ -64,8 +64,12 @@ static int read_eeprom(struct am43xx_board_id *header)
 			       CONFIG_SYS_I2C_EEPROM_ADDR);
 			return -EIO;
 		}
-
-		if (header->magic != 0xEE3355AA) {
+		if (header->magic == 0xffffffff) {
+			printf("Empty magic number (0x%x) in EEPROM - setting gp-evm\n",
+			       header->magic);
+			strncpy(header->name, "AM43__GP", sizeof("AM43__GP"));
+			strncpy(header->version, "1.4", sizeof("1.4"));
+		} else if (header->magic != 0xEE3355AA) {
 			printf("Incorrect magic number (0x%x) in EEPROM\n",
 			       header->magic);
 			return -EINVAL;
@@ -77,6 +81,36 @@ static int read_eeprom(struct am43xx_board_id *header)
 
 	strncpy(am43xx_board_rev, (char *)header->version, sizeof(header->version));
 	am43xx_board_rev[sizeof(header->version)] = 0;
+
+	return 0;
+}
+
+static int read_expansion_eeprom(struct am43xx_board_id *header)
+{
+	/* Check if baseboard eeprom is available */
+	if (i2c_probe(CONFIG_SYS_I2C_EEPROM_ADDR + 1)) {
+		printf("Could not probe the expansion EEPROM at 0x%x\n",
+		       CONFIG_SYS_I2C_EEPROM_ADDR + 1);
+		return -ENODEV;
+	}
+
+	/* read the eeprom using i2c */
+	if (i2c_read(CONFIG_SYS_I2C_EEPROM_ADDR + 1, 0, 2, (uchar *)header,
+		     sizeof(struct am43xx_board_id))) {
+		printf("Could not read the expansion EEPROM\n");
+		return -EIO;
+	}
+
+	if (header->magic == 0xffffffff) {
+		printf("Empty magic number (0x%x) in EEPROM - setting Panel070 1.0\n",
+		       header->magic);
+		strncpy(header->name, "PANEL070", sizeof("PANEL070"));
+		strncpy(header->version, "1.0", sizeof("1.0"));
+	} else if (header->magic != 0xEE3355AA) {
+		printf("Incorrect magic number (0x%x) in EEPROM\n",
+		       header->magic);
+		return -EINVAL;
+	}
 
 	return 0;
 }
@@ -142,6 +176,9 @@ const struct dpll_params epos_evm_dpll_ddr[NUM_CRYSTAL_FREQ] = {
 };
 
 const struct dpll_params gp_evm_dpll_ddr = {
+		50, 2, 1, -1, 2, -1, -1};
+
+const struct dpll_params misdimm_dpll_ddr = {
 		50, 2, 1, -1, 2, -1, -1};
 
 static const struct dpll_params idk_dpll_ddr = {
@@ -378,6 +415,8 @@ const struct dpll_params *get_dpll_ddr_params(void)
 		return &epos_evm_dpll_ddr[ind];
 	else if (board_is_gpevm() || board_is_sk())
 		return &gp_evm_dpll_ddr;
+	else if (board_is_misdimm())
+		return &misdimm_dpll_ddr;
 	else if (board_is_idk())
 		return &idk_dpll_ddr;
 
@@ -640,6 +679,10 @@ void sdram_init(void)
 	} else if (board_is_idk()) {
 		config_ddr(400, &ioregs_ddr3, NULL, NULL,
 			   &ddr3_idk_emif_regs_400Mhz, 0);
+	} else if (board_is_misdimm()) {
+		enable_vtt_regulator();
+		config_ddr(0, &ioregs_ddr3, NULL, NULL,
+			   &ddr3_emif_regs_400Mhz_production, 0);
 	}
 }
 #endif
@@ -726,6 +769,19 @@ int board_late_init(void)
 	strncpy(safe_string, (char *)header.version, sizeof(header.version));
 	safe_string[sizeof(header.version)] = 0;
 	setenv("board_rev", safe_string);
+
+	if (board_is_misdimm()) {
+		read_expansion_eeprom(&header);
+
+		strncpy(safe_string, (char *)header.name, sizeof(header.name));
+		safe_string[sizeof(header.name)] = 0;
+		setenv("expansion_name", safe_string);
+
+		strncpy(safe_string, (char *)header.version, sizeof(header.version));
+		safe_string[sizeof(header.version)] = 0;
+		setenv("expansion_rev", safe_string);
+	}
+
 #endif
 	return 0;
 }

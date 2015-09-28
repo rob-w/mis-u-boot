@@ -16,7 +16,7 @@
 #define CONFIG_BOARD_LATE_INIT
 #define CONFIG_ARCH_CPU_INIT
 #define CONFIG_SYS_CACHELINE_SIZE       32
-#define CONFIG_MAX_RAM_BANK_SIZE	(1024 << 21)	/* 2GB */
+#define CONFIG_MAX_RAM_BANK_SIZE	(2048 << 21)	/* 2GB */
 #define CONFIG_SYS_TIMERBASE		0x48040000	/* Use Timer2 */
 
 #include <asm/arch/omap.h>
@@ -233,23 +233,22 @@
 	DEFAULT_LINUX_BOOT_ENV \
 	DEFAULT_MMC_TI_ARGS \
 	"fdtfile=undefined\0" \
-	"bootpart=0:2\0" \
+	"bootpart=1:2\0" \
 	"bootdir=/boot\0" \
 	"bootfile=zImage\0" \
+	"bootdelay=1\0" \
 	"console=ttyO0,115200n8\0" \
 	"partitions=" \
 		"uuid_disk=${uuid_gpt_disk};" \
 		"name=rootfs,start=2MiB,size=-,uuid=${uuid_gpt_rootfs}\0" \
 	"optargs=\0" \
+	"mmcdev=1\0" \
+	"mmcroot=/dev/mmcblk1p2 rw\0" \
 	"usbroot=/dev/sda2 rw\0" \
 	"usbrootfstype=ext4 rootwait\0" \
 	"usbdev=0\0" \
 	"ramroot=/dev/ram0 rw\0" \
 	"ramrootfstype=ext2\0" \
-	"usbargs=setenv bootargs console=${console} " \
-		"${optargs} " \
-		"root=${usbroot} " \
-		"rootfstype=${usbrootfstype}\0" \
 	"bootenv=uEnv.txt\0" \
 	"loadbootenv=load ${devtype} ${devnum} ${loadaddr} ${bootenv}\0" \
 	"importbootenv=echo Importing environment from mmc ...; " \
@@ -261,9 +260,27 @@
 	"loadramdisk=load ${devtype} ${devnum} ${rdaddr} ramdisk.gz\0" \
 	"loadimage=load ${devtype} ${bootpart} ${loadaddr} ${bootdir}/${bootfile}\0" \
 	"loadfdt=load ${devtype} ${bootpart} ${fdtaddr} ${bootdir}/${fdtfile}\0" \
-	"mmcboot=mmc dev ${mmcdev}; " \
+	"mmcboot=setenv mmcdev 0;"\
 		"setenv devnum ${mmcdev}; " \
 		"setenv devtype mmc; " \
+		"mmc dev ${mmcdev};" \
+		"if mmc rescan ; then " \
+			"echo micro SD card found;" \
+			"if run loadbootenv; then " \
+				"echo Loaded environment from ${bootenv};" \
+				"echo Detected sd boot card; " \
+				"setenv mmcdev 0;"\
+			"else "\
+				"echo not a boot card, setting mmcdev to 1;" \
+				"setenv mmcdev 1;" \
+			"fi;" \
+		"else " \
+			"echo No micro SD card found, setting mmcdev to 1;" \
+			"setenv mmcdev 1;"\
+		"fi;" \
+		"mmc dev ${mmcdev}; " \
+		"setenv mmcdev ${mmcdev};"\
+		"setenv devnum ${mmcdev}; " \
 		"if mmc rescan; then " \
 			"echo SD/MMC found on device ${devnum};" \
 			"if run loadbootenv; then " \
@@ -304,6 +321,20 @@
 		"fi;" \
 		"usb stop ${usbdev};\0" \
 	"findfdt="\
+		"if test $board_name = MISDIMM_; then " \
+			"if test $expansion_name = P070H111; then " \
+				"setenv fdtfile am437x-mispanel070h.dtb; " \
+				"echo Found P070H111; "\
+			"else " \
+				"if test $expansion_name = P070F111; then " \
+					"setenv fdtfile am437x-mispanel070f.dtb; " \
+					"echo Found P070F111; "\
+				"else " \
+					"setenv fdtfile am437x-misdimm-evm.dtb; " \
+					"echo Found MISDIMM EVM; "\
+				"fi; " \
+			"fi; " \
+		"fi; " \
 		"if test $board_name = AM43EPOS; then " \
 			"setenv fdtfile am43x-epos-evm.dtb; fi; " \
 		"if test $board_name = AM43__GP; then " \
@@ -321,8 +352,6 @@
 #define CONFIG_BOOTCOMMAND \
 	"run findfdt; " \
 	"run mmcboot;" \
-	"run usbboot;" \
-	NANDBOOT \
 
 #endif
 
