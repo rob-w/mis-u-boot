@@ -94,11 +94,7 @@
 /* NS16550 Configuration */
 #define CONFIG_SYS_NS16550_COM1		0x44e09000	/* Base EVM has UART0 */
 
-#define CONFIG_ENV_IS_IN_FAT
-#define FAT_ENV_INTERFACE		"mmc"
-#define FAT_ENV_DEVICE_AND_PART		"0:1"
-#define FAT_ENV_FILE			"uboot.env"
-#define CONFIG_FAT_WRITE
+#define CONFIG_ENV_IS_NOWHERE
 
 #define CONFIG_SPL_LDSCRIPT		"$(CPUDIR)/omap-common/u-boot-spl.lds"
 
@@ -236,7 +232,7 @@
 	"bootpart=1:2\0" \
 	"bootdir=/boot\0" \
 	"bootfile=zImage\0" \
-	"bootdelay=1\0" \
+	"bootdelay=0\0" \
 	"console=ttyO0,115200n8\0" \
 	"partitions=" \
 		"uuid_disk=${uuid_gpt_disk};" \
