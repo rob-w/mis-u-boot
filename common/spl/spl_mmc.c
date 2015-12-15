@@ -99,7 +99,10 @@ void spl_mmc_load_image(void)
 	int err;
 	__maybe_unused int part;
 
-	mmc_initialize(gd->bd);
+	if (mmc_initialize(gd->bd) < 0) {
+		printf("spl: mmc init failed \n");
+		hang();
+	}
 
 	/* We register only one device. So, the dev id is always 0 */
 	mmc = find_mmc_device(0);

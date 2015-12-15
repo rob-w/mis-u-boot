@@ -650,8 +650,10 @@ int omap_mmc_init(int dev_index, uint host_caps_mask, uint f_max, int cd_gpio,
 	uint host_caps_val;
 
 	priv_data = malloc(sizeof(*priv_data));
-	if (priv_data == NULL)
+	if (priv_data == NULL) {
+		printf("omap_mmc_init() error on malloc for %d bytes\n",sizeof(*priv_data));
 		return -1;
+	}
 
 	host_caps_val = MMC_MODE_4BIT | MMC_MODE_HS_52MHz | MMC_MODE_HS;
 

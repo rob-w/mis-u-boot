@@ -1758,11 +1758,15 @@ static void do_preinit(void)
 
 int mmc_initialize(bd_t *bis)
 {
+	int ret = 0;
+
 	INIT_LIST_HEAD (&mmc_devices);
 	cur_dev_num = 0;
 
 	if (board_mmc_init(bis) < 0)
-		cpu_mmc_init(bis);
+		ret = cpu_mmc_init(bis);
+	if (ret != 0)
+		return ret;
 
 #ifndef CONFIG_SPL_BUILD
 	print_mmc_devices(',');
