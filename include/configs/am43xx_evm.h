@@ -326,8 +326,13 @@
 					"setenv fdtfile am437x-mispanel070f.dtb; " \
 					"echo Found P070F111; "\
 				"else " \
-					"setenv fdtfile am437x-misdimm-evm.dtb; " \
-					"echo Found MISDIMM EVM; "\
+					"if test $expansion_name = P120B110; then " \
+						"setenv fdtfile am437x-mispanel120b.dtb; " \
+						"echo Found P120B110; "\
+					"else " \
+						"setenv fdtfile am437x-misdimm-evm.dtb; " \
+						"echo Found MISDIMM EVM; "\
+					"fi; " \
 				"fi; " \
 			"fi; " \
 		"fi; " \
