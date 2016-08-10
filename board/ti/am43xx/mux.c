@@ -144,6 +144,7 @@ void enable_board_pin_mux(void)
 	if (board_is_misdimm()) {
 		configure_module_pin_mux(mmc1_pin_mux);
 		configure_module_pin_mux(general_pin_mux);
+		configure_module_pin_mux(rgmii1_pin_mux);
 	}
 
 	configure_module_pin_mux(i2c0_pin_mux);
