@@ -103,39 +103,6 @@
 #define CONFIG_SPL_USB_SUPPORT
 #endif
 
-#if defined(CONFIG_SPL_USB_HOST_SUPPORT) || !defined(CONFIG_SPL_BUILD)
-#define CONFIG_SYS_USB_FAT_BOOT_PARTITION		1
-#define CONFIG_CMD_USB
-#define CONFIG_USB_HOST
-#define CONFIG_USB_XHCI
-#define CONFIG_USB_XHCI_OMAP
-#define CONFIG_USB_STORAGE
-#define CONFIG_SYS_USB_XHCI_MAX_ROOT_PORTS 2
-
-#define CONFIG_OMAP_USB_PHY
-#define CONFIG_AM437X_USB2PHY2_HOST
-#endif
-
-/* USB GADGET */
-#if !defined(CONFIG_SPL_BUILD) || \
-	(defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_USBETH_SUPPORT))
-#define CONFIG_USB_DWC3_PHY_OMAP
-#define CONFIG_USB_DWC3_OMAP
-#define CONFIG_USB_DWC3
-#define CONFIG_USB_DWC3_GADGET
-
-#define CONFIG_USB_GADGET
-#define CONFIG_USB_ETHER
-#define CONFIG_USB_ETH_RNDIS
-#define CONFIG_USBNET_HOST_ADDR "de:ad:be:af:00:00"
-#define CONFIG_USBDOWNLOAD_GADGET
-#define CONFIG_USB_GADGET_VBUS_DRAW 2
-#define CONFIG_G_DNL_MANUFACTURER "Texas Instruments"
-#define CONFIG_G_DNL_VENDOR_NUM 0x0403
-#define CONFIG_G_DNL_PRODUCT_NUM 0xBD00
-#define CONFIG_USB_GADGET_DUALSPEED
-#endif
-
 #if (defined(CONFIG_SPL_BUILD) && defined(CONFIG_SPL_USBETH_SUPPORT))
 #undef CONFIG_ENV_IS_IN_FAT
 #define CONFIG_ENV_IS_NOWHERE
@@ -143,44 +110,6 @@
 
 #if defined(CONFIG_SPL_USBETH_SUPPORT) || defined(CONFIG_SPL_ETH_SUPPORT)
 #define CONFIG_SPL_NET_SUPPORT
-#endif
-
-#ifndef CONFIG_SPL_BUILD
-/* USB Device Firmware Update support */
-#define CONFIG_DFU_FUNCTION
-#define CONFIG_DFU_RAM
-#define CONFIG_CMD_DFU
-
-#define CONFIG_DFU_MMC
-#define DFU_ALT_INFO_MMC \
-	"dfu_alt_info_mmc=" \
-	"boot part 0 1;" \
-	"rootfs part 0 2;" \
-	"MLO fat 0 1;" \
-	"spl-os-args fat 0 1;" \
-	"spl-os-image fat 0 1;" \
-	"u-boot.img fat 0 1;" \
-	"uEnv.txt fat 0 1\0"
-
-#define DFU_ALT_INFO_EMMC \
-	"dfu_alt_info_emmc=" \
-	"MLO raw 0x100 0x100 mmcpart 0;" \
-	"u-boot.img raw 0x300 0x1000 mmcpart 0\0"
-
-#define CONFIG_DFU_RAM
-#define DFU_ALT_INFO_RAM \
-	"dfu_alt_info_ram=" \
-	"kernel ram 0x80200000 0x4000000;" \
-	"fdt ram 0x80f80000 0x80000;" \
-	"ramdisk ram 0x81000000 0x4000000\0"
-
-#define DFUARGS \
-	"dfu_bufsiz=0x10000\0" \
-	DFU_ALT_INFO_MMC \
-	DFU_ALT_INFO_EMMC \
-	DFU_ALT_INFO_RAM
-#else
-#define DFUARGS
 #endif
 
 #ifdef CONFIG_QSPI_BOOT
@@ -240,9 +169,6 @@
 	"optargs=\0" \
 	"mmcdev=1\0" \
 	"mmcroot=/dev/mmcblk1p2 rw\0" \
-	"usbroot=/dev/sda2 rw\0" \
-	"usbrootfstype=ext4 rootwait\0" \
-	"usbdev=0\0" \
 	"ramroot=/dev/ram0 rw\0" \
 	"ramrootfstype=ext2\0" \
 	"bootenv=uEnv.txt\0" \
@@ -294,28 +220,6 @@
 				"bootz ${loadaddr} - ${fdtaddr}; " \
 			"fi;" \
 		"fi;\0" \
-	"usbboot=" \
-		"setenv devnum ${usbdev}; " \
-		"setenv devtype usb; " \
-		"usb start ${usbdev}; " \
-		"if usb dev ${usbdev}; then " \
-			"if run loadbootenv; then " \
-				"echo Loaded environment from ${bootenv};" \
-				"run importbootenv;" \
-			"fi;" \
-			"if test -n $uenvcmd; then " \
-				"echo Running uenvcmd ...;" \
-				"run uenvcmd;" \
-			"fi;" \
-			"if run loadimage; then " \
-				"run loadfdt; " \
-				"echo Booting from usb ${usbdev}...; " \
-				"run usbargs;" \
-				"bootz ${loadaddr} - ${fdtaddr}; " \
-			"fi;" \
-		"fi\0" \
-		"fi;" \
-		"usb stop ${usbdev};\0" \
 	"findfdt="\
 		"if test $board_name = MISDIMM_; then " \
 			"if test $expansion_name = P070H111; then " \
@@ -346,9 +250,7 @@
 			"setenv fdtfile am437x-idk-evm.dtb; fi; " \
 		"if test $fdtfile = undefined; then " \
 			"echo WARNING: Could not determine device tree; fi; \0" \
-	NANDARGS \
 	NETARGS \
-	DFUARGS \
 
 #define CONFIG_BOOTCOMMAND \
 	"run findfdt; " \
