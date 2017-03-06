@@ -225,19 +225,18 @@
 			"if test $expansion_name = P070H111; then " \
 				"setenv fdtfile am437x-mispanel070h.dtb; " \
 				"echo Found P070H111; "\
+			"elif test $expansion_name = P070F111; then " \
+				"setenv fdtfile am437x-mispanel070f.dtb; " \
+				"echo Found P070F111; "\
+			"elif test $expansion_name = P120B110; then " \
+				"setenv fdtfile am437x-mispanel120b.dtb; " \
+				"echo Found P120B110; "\
+			"elif test $expansion_name = MDIS070A; then " \
+				"setenv fdtfile am437x-mismdis070a.dtb; " \
+				"echo Found MISMDIS070A; "\
 			"else " \
-				"if test $expansion_name = P070F111; then " \
-					"setenv fdtfile am437x-mispanel070f.dtb; " \
-					"echo Found P070F111; "\
-				"else " \
-					"if test $expansion_name = P120B110; then " \
-						"setenv fdtfile am437x-mispanel120b.dtb; " \
-						"echo Found P120B110; "\
-					"else " \
-						"setenv fdtfile am437x-misdimm-evm.dtb; " \
-						"echo Found MISDIMM EVM; "\
-					"fi; " \
-				"fi; " \
+				"setenv fdtfile am437x-misdimm-evm.dtb; " \
+				"echo Found MISDIMM EVM; "\
 			"fi; " \
 		"fi; " \
 		"if test $board_name = AM43EPOS; then " \
