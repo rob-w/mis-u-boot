@@ -234,6 +234,12 @@
 			"elif test $expansion_name = MDIS070A; then " \
 				"setenv fdtfile am437x-mismdis070a.dtb; " \
 				"echo Found MISMDIS070A; "\
+				"i2c mw 60 0 0; "\
+				"i2c mw 60 17 0; "\
+				"i2c mw 60 16 0; "\
+				"i2c mw 60 15 0; "\
+				"i2c mw 60 14 0; "\
+				"i2c mw 60 14 1; "\
 			"else " \
 				"setenv fdtfile am437x-misdimm-evm.dtb; " \
 				"echo Found MISDIMM EVM; "\
