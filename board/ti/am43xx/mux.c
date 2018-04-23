@@ -84,12 +84,6 @@ static struct module_pin_mux gpio5_7_pin_mux[] = {
 	{-1},
 };
 
-static struct module_pin_mux lcd_init_pin_mux[] = {
-	{OFFSET(clkreq), (MODE(7) | PULLDOWN_EN)},	/* GPIO0_24 */
-	{OFFSET(spi4_d1), (MODE(7) | PULLUP_EN)},	/* GPIO5_6 */
-	{-1},
-};
-
 static struct module_pin_mux general_pin_mux[] = {
 	/* Make extra sure on misdimm */
 	{OFFSET(spi2_d0), (MODE(7) | PULLDOWN_EN)}, /* REGULATORS_OFF */
@@ -151,7 +145,6 @@ void enable_board_pin_mux(void)
 		configure_module_pin_mux(mmc1_pin_mux);
 		configure_module_pin_mux(general_pin_mux);
 		configure_module_pin_mux(rgmii1_pin_mux);
-		configure_module_pin_mux(lcd_init_pin_mux);
 	}
 
 	configure_module_pin_mux(i2c0_pin_mux);
